@@ -1,190 +1,900 @@
-<!DOCTYPE HTML>
-<!--
-	Massively by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-		<title>Massively by HTML5 UP</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
-	<body class="is-preload">n
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Segun Bakare — Data Analyst & Analytics Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-		<!-- Wrapper -->
-			<div id="wrapper" class="fade-in">
+  <style>
+    /* ── RESET & BASE ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-				<!-- Intro -->
-					<div id="intro">
-						<h1>Segun Bakare | Data Analyst | AI & Automation Strategist<br />
-						</h1>
-						<p>I design intelligent data systems that do more than visualize numbers, they reveal opportunity. With a background in data analytics, automation, and predictive modeling, I build end-to-end solutions that help teams make smarter decisions faster. My work combines technical depth in Python, SQL, and BI tools with a business-first mindset, ensuring every dashboard, model, and insight ties back to measurable impact.<a href="https://www.upwork.com/freelancers/~01e0f7b2ebebabdfb4"> @Segun</a>.<a</a></p>
-						<ul class="actions">
-							<li><a href="#header" class="button icon solid solo fa-arrow-down scrolly">Continue</a></li>
-						</ul>
-					</div>
+    :root {
+      --bg:        #07080D;
+      --bg-card:   #0E0F17;
+      --bg-hover:  #141520;
+      --border:    #1E2030;
+      --accent:    #00F5A0;
+      --accent-dim:#00C880;
+      --orange:    #FF6B35;
+      --text:      #E8E9F3;
+      --muted:     #6B6E87;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --font-body: 'Outfit', sans-serif;
+    }
 
-				<!-- Header -->
-					<header id="header">
-						<a href="index.html" class="logo">DATA ANALYST</a>
-					</header>
+    html { scroll-behavior: smooth; }
 
-				<!-- Nav -->
-					<nav id="nav">
-						<ul class="links">
-							<li class="active"><a href="index.html">Projects</a></li>
-							<li><a href="https://public.tableau.com/app/profile/segun.bakare1740/vizzes">Dashboard</a></li>
-							<li><a href="https://medium.com/@segunbakare.d">Medium</a></li>
-							<li><a href="https://onedrive.live.com/personal/acf8412a88be18ad/_layouts/15/doc2.aspx?resid=88be18ad-412a-20f8-80ac-7a0100000000&cid=acf8412a88be18ad">Résumé</a></li>
-						</ul>
-						<ul class="icons">
-	
-							<li><a href="https://www.linkedin.com/in/segun-bakare-d/" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
-							<li><a href="https://github.com/Shegszz" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-						</ul>
-					</nav>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
 
-				<!-- Main -->
-					<div id="main">
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
 
-						<!-- Featured Post -->
-							<article class="post featured">
-								<header class="major">
-									<span class="date"></span>
-									<h2><a href="https://docs.google.com/spreadsheets/d/1ajm5wgoI66MSi7FOd_C1pE78VVtlDfdYE8K7zbasRz0/edit?gid=61701544#gid=61701544">Data Automation and Reporting Pipeline<br />
-									</a></h2>
-									<p>An automated data pipeline that fetches, cleans, and analyzes Fantasy Premier League data daily. Built predictive models to rank players based on form, fixture difficulty, and manager selection trends, powering data-driven transfer recommendations. Improved accuracy of player predictions by 20%.</p>
-								</header>
-								<a href="https://docs.google.com/spreadsheets/d/1ajm5wgoI66MSi7FOd_C1pE78VVtlDfdYE8K7zbasRz0/edit?gid=61701544#gid=61701544" class="image main"><img src="images/FPL20242025.jpeg" alt="" /></a>
-								<ul class="actions special">
-									<li><a href="https://docs.google.com/spreadsheets/d/1ajm5wgoI66MSi7FOd_C1pE78VVtlDfdYE8K7zbasRz0/edit?gid=61701544#gid=61701544" class="button large">View Project</a></li>
-								</ul>
-							</article>
+    /* ── NAV ────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 3rem;
+      background: rgba(7, 8, 13, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
 
-						<!-- Posts -->
-							<section class="posts">
-								<article>
-									<header>
-										<span class="date"></span>
-										<h2><a href="https://public.tableau.com/app/profile/segun.bakare1740/viz/AttritionDashboard_17599246960860/Dashboard1">HR Analytics Dashboard<br />
-									</a></h2>
-									</header>
-									<a href="https://public.tableau.com/app/profile/segun.bakare1740/viz/AttritionDashboard_17599246960860/Dashboard1" class="image fit"><img src="images/HR Analytics Dashboard.png" alt="" /></a>
-									<p>Designed a concise HR Analytics Dashboard in Tableau, highlighting a 16.12% attrition rate, 56.12% Sales department turnover, and gender-age trends across 1,470 employees. Informed HR policies to reduce attrtion in high-turnover departments.</p>
-									<ul class="actions special">
-										<li><a href="https://public.tableau.com/app/profile/segun.bakare1740/viz/AttritionDashboard_17599246960860/Dashboard1" class="button">View Project</a></li>
-									</ul>
-								</article>
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+    }
 
-								<article>
-									<header>
-										<span class="date"></span>
-										<h2><a href="https://public.tableau.com/app/profile/segun.bakare1740/viz/Interactive0SuperstorePerformanceDashboard/Dashboard2">Superstore Performance Dashboard<br />
-										</a></h2>
-									</header>
-									<a href="https://public.tableau.com/app/profile/segun.bakare1740/viz/InteractiveSuperstorePerformanceDashboard/Dashboard2" class="image fit"><img src="images/Superstore Key Metrics Dashboard.png" alt="" /></a>
-									<p>Engineered a high-impact Superstore Metrics Dashboard on Tableau, analyzing $2.3M sales, 373K profit. and revenue trends. Helped sales managers priortize high-margin products and regions.</p>
-									<ul class="actions special">
-										<li><a href="https://public.tableau.com/app/profile/segun.bakare1740/viz/InteractiveSuperstorePerformanceDashboard/Dashboard2" class="button">View Project</a></li>
-									</ul>
-								</article>
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
 
-								<article>
-									<header>
-										<span class="date"></span>
-										<h2><a href="https://github.com/Shegszz/Splendor-Hotel-Groups-Data-Analysis">Data Exploration in SQL<br />
-										</a></h2>
-									</header>
-									<a href="https://github.com/Shegszz/Splendor-Hotel-Groups-Data-Analysis" class="image fit"><img src="images/SHG_Viz.png" alt="" /></a>
-									<p>Identified seasonal booking trends, guest profiles, and revenue opportunities, informing pricing strategy.</p>
-									<ul class="actions special">
-										<li><a href="https://github.com/Shegszz/Splendor-Hotel-Groups-Data-Analysis" class="button">View Project</a></li>
-									</ul>
-								</article>
-								
-								<article>
-									<header>
-										<span class="date"></span>
-										<h2><a href="https://github.com/Shegszz/SpaceX-Mission-Data-Scraper.git">SpaceX Mission Data Scraper with python<br />
-										</a></h2>
-									</header>
-									<a href="https://github.com/Shegszz/SpaceX-Mission-Data-Scraper.git" class="image fit"><img src="images/headlines_wordcloud.png" alt="" /></a>
-									<p>An intelligent web scraper that extracts SpaceX launch data including mission names, launch dates, rockets used, and launch sites, transforming raw web content into structured insights for space operations research.</p>
-									<ul class="actions special">
-										<li><a href="https://github.com/Shegszz/SpaceX-Mission-Data-Scraper.git" class="button">View Project</a></li>
-									</ul>
-								</article>
-								<article>
-									<header>
-										<span class="date"></span>
-										<h2><a href="https://github.com/Shegszz/Customer-Churn-Analysis">Customer Churn Analysis<br />
-									</a></h2>
-									</header>
-									<a href="https://github.com/Shegszz/Customer-Churn-Analysis" class="image fit"><img src="images/churn2.png" alt="" /></a>
-									<p>Uncovered why customers leave using data from 5,880 records, identified churn drivers and recommended retention strategies projected to save $50K annually.</p>
-									<ul class="actions special">
-										<li><a href="https://github.com/Shegszz/Customer-Churn-Analysis" class="button">View Project</a></li>
-									</ul>
-								</article>
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
 
-								<article>
-									<header>
-										<span class="date"></span>
-										<h2><a href="https://public.tableau.com/app/profile/segun.bakare1740/vizzes">Business Intelligence Dashboard Portfolio<br />
-									</a></h2>
-									</header>
-									<a href="https://public.tableau.com/app/profile/segun.bakare1740/vizzes" class="image fit"><img src="images/Tableau_image.png" alt="" /></a>
-									<p>Simplified complex E-commerce, Finance, and Marketing datasets into actionable dashboards used for strategic decisions.</p>
-									<ul class="actions special">
-										<li><a href="https://public.tableau.com/app/profile/segun.bakare1740/vizzes" class="button">View Dashboards</a></li>
-									</ul>
-								</article>
-								
-							
-						</section>
-						<section class="split contact">
-							<section class="alt">
-								<h3>Address</h3>
-								<p>Abuja, Nigeria<br />
-								</p>
-							</section>
-							<section>
-								<h3>Phone</h3>
-								<p><a href="#">(+234) 903-9453-588</a></p>
-							</section>
-							<section>
-								<h3>Email</h3>
-								<p><a href="mailto:segunbakare.d@gmail.com">segunbakare.d@gmail.com</a></p>
-							</section>
-							<section>
-								<h3>Social</h3>
-								<ul class="icons alt">
-									
-									<li><a href="https://www.linkedin.com/in/segun-bakare-d/" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
-									<li><a href="https://github.com/Shegszz" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
-								</ul>
-							</section>
-						</section>
-					</footer>
+    .nav-links a:hover { color: var(--text); }
 
-				<!-- Copyright -->
-					<div id="copyright">
-						<ul><li>&copy; SEGUNBAKARE</li><li>Design: <a href="https://twitter.com/Segun_B_">SEGUNBAKARE</a></li></ul>
-					</div>
+    .btn-nav {
+      background: var(--accent);
+      color: var(--bg) !important;
+      font-weight: 500;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      transition: background 0.2s, transform 0.15s !important;
+    }
 
-			</div>
+    .btn-nav:hover {
+      background: var(--accent-dim) !important;
+      transform: translateY(-1px);
+      color: var(--bg) !important;
+    }
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.scrollex.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
+    /* ── HERO ───────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 3rem;
+      padding-top: 80px;
+      position: relative;
+      overflow: hidden;
+    }
 
-	</body>
+    .hero-grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, #1E2030 1px, transparent 1px),
+        linear-gradient(to bottom, #1E2030 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 20%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,245,160,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-label {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--accent);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.1s forwards;
+    }
+
+    .hero-name {
+      font-family: var(--font-head);
+      font-size: clamp(3.5rem, 8vw, 7.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.25s forwards;
+    }
+
+    .hero-name span {
+      color: var(--accent);
+    }
+
+    .hero-role {
+      font-family: var(--font-head);
+      font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+      font-weight: 400;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.4s forwards;
+    }
+
+    .hero-desc {
+      max-width: 560px;
+      font-size: 1.05rem;
+      color: #9EA0B8;
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.55s forwards;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.7s forwards;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent);
+      color: var(--bg);
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.85rem 1.8rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dim);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.85rem 1.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 3rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 1s forwards;
+    }
+
+    .scroll-line {
+      width: 40px;
+      height: 1px;
+      background: var(--muted);
+    }
+
+    /* ── STACK BAR ──────────────────────────────────────────── */
+    #stack {
+      padding: 2.5rem 3rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      overflow-x: auto;
+    }
+
+    .stack-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .stack-pills {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── SECTION COMMON ─────────────────────────────────────── */
+    section { padding: 6rem 3rem; }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin-bottom: 3.5rem;
+    }
+
+    /* ── FEATURED PROJECT ───────────────────────────────────── */
+    .featured-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-card);
+      transition: border-color 0.3s;
+    }
+
+    .featured-card:hover { border-color: rgba(0,245,160,0.3); }
+
+    .featured-image {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .featured-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .featured-card:hover .featured-image img { transform: scale(1.04); }
+
+    .featured-content {
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .project-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: rgba(0,245,160,0.07);
+      border: 1px solid rgba(0,245,160,0.2);
+      padding: 0.3rem 0.7rem;
+      border-radius: 3px;
+      margin-bottom: 1.5rem;
+    }
+
+    .project-title {
+      font-family: var(--font-head);
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1.2rem;
+    }
+
+    .project-desc {
+      color: #9EA0B8;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-bottom: 1.5rem;
+    }
+
+    .project-metrics {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .metric-value {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .metric-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .project-tech {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .tech-chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 3px;
+    }
+
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--accent);
+      transition: gap 0.2s;
+    }
+
+    .project-link:hover { gap: 0.75rem; }
+
+    .arrow { font-size: 1rem; }
+
+    /* ── PROJECT GRID ───────────────────────────────────────── */
+    .project-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .project-card:hover {
+      border-color: rgba(0,245,160,0.25);
+      transform: translateY(-4px);
+    }
+
+    .card-image {
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .project-card:hover .card-image img { transform: scale(1.05); }
+
+    .card-content {
+      padding: 1.75rem;
+    }
+
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-desc {
+      color: #9EA0B8;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── TABLEAU CALLOUT ────────────────────────────────────── */
+    #tableau {
+      padding: 4rem 3rem;
+    }
+
+    .tableau-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .tableau-banner:hover { border-color: rgba(0,245,160,0.3); }
+
+    .tableau-bg-text {
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-head);
+      font-size: 10rem;
+      font-weight: 800;
+      color: rgba(255,255,255,0.02);
+      pointer-events: none;
+      letter-spacing: -0.05em;
+      white-space: nowrap;
+    }
+
+    .tableau-left h3 {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .tableau-left p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 440px;
+    }
+
+    /* ── BOOK A CALL ────────────────────────────────────────── */
+    #booking {
+      padding: 6rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .booking-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(0,245,160,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .booking-inner {
+      position: relative;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .booking-inner .section-label { justify-content: center; display: flex; }
+
+    .booking-inner .section-title {
+      margin-bottom: 1.25rem;
+    }
+
+    .booking-inner p {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.75;
+    }
+
+    .booking-chips {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .booking-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      padding: 2.5rem 3rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-left {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .footer-left span { color: var(--accent); }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ── DIVIDER ─────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 3rem;
+    }
+
+    /* ── ANIMATIONS ─────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── MOBILE ──────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      #hero, section, #tableau, #booking { padding-left: 1.5rem; padding-right: 1.5rem; }
+      #stack { padding: 2rem 1.5rem; }
+      footer { padding: 2rem 1.5rem; }
+      .divider { margin: 0 1.5rem; }
+      .featured-card { grid-template-columns: 1fr; }
+      .featured-image { height: 260px; }
+      .project-grid { grid-template-columns: 1fr; }
+      .tableau-banner { flex-direction: column; align-items: flex-start; padding: 2rem; }
+      .nav-links .hide-mobile { display: none; }
+      .hero-scroll-hint { left: 1.5rem; }
+    }
+
+    @media (max-width: 600px) {
+      .hero-name { font-size: 3rem; }
+      nav { padding: 1rem; }
+      #hero { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <span class="nav-logo">SEGUN.DEV</span>
+    <ul class="nav-links">
+      <li class="hide-mobile"><a href="#projects">Work</a></li>
+      <li class="hide-mobile"><a href="https://public.tableau.com/app/profile/segun.bakare1740/vizzes" target="_blank">Dashboards</a></li>
+      <li class="hide-mobile"><a href="https://medium.com/@segunbakare.d" target="_blank">Writing</a></li>
+      <li class="hide-mobile"><a href="https://www.linkedin.com/in/segun-bakare-d/" target="_blank">LinkedIn</a></li>
+      <li class="hide-mobile"><a href="https://drive.google.com/file/d/1BmHlNCcW4lqzfuQD-Cg5mVDtForwFgXC/view?usp=sharing" target="_blank">Résumé</a></li>
+      <li><a href="https://calendly.com/segunbakare-d/30min" target="_blank" class="btn-nav">Book a Call</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-glow"></div>
+
+    <p class="hero-label">Data Analyst &amp; Analytics Engineer</p>
+    <h1 class="hero-name">Segun<br /><span>Bakare.</span></h1>
+    <p class="hero-role">I turn raw data into decisions.</p>
+    <p class="hero-desc">
+      I build end-to-end data systems — automated pipelines, predictive models, and BI dashboards — that move teams from gut-feel to evidence-backed strategy. Python · SQL · Power BI · Tableau · XGBoost.
+    </p>
+    <div class="hero-ctas">
+      <a href="#projects" class="btn-primary">View My Work <span class="arrow">↓</span></a>
+      <a href="https://calendly.com/segunbakare-d/30min" target="_blank" class="btn-outline">Book a Call <span class="arrow">↗</span></a>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <span class="scroll-line"></span>
+      scroll to explore
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <div id="stack">
+    <span class="stack-label">Stack</span>
+    <div class="stack-pills">
+      <span class="pill">Python</span>
+      <span class="pill">SQL</span>
+      <span class="pill">Power BI</span>
+      <span class="pill">Tableau</span>
+      <span class="pill">XGBoost</span>
+      <span class="pill">dbt</span>
+      <span class="pill">Apache Airflow</span>
+      <span class="pill">GitHub Actions</span>
+      <span class="pill">REST APIs</span>
+      <span class="pill">Google Sheets API</span>
+      <span class="pill">ETL/ELT Pipelines</span>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label reveal">Selected Work</p>
+    <h2 class="section-title reveal">Projects that ship.</h2>
+    <p class="section-subtitle reveal">Not exercises. Real systems with real outputs.</p>
+
+    <!-- FEATURED: FPL Analytics Engine -->
+    <div class="featured-card reveal">
+      <div class="featured-image">
+        <img src="images/FPL26.png" alt="FPL Analytics Engine Dashboard" loading="lazy" />
+      </div>
+      <div class="featured-content">
+        <div>
+          <span class="project-tag">✦ Flagship Project</span>
+          <h3 class="project-title">Automated FPL Analytics Engine</h3>
+          <p class="project-desc">
+            A fully automated ML pipeline that fetches live FPL data daily, runs position-specific ensemble models (XGBoost + Gradient Boosting + Random Forest), and surfaces ranked transfer recommendations. Custom metrics: FD Index, Delta GI, ΔG_GW. Zero manual input after setup.
+          </p>
+          <div class="project-metrics">
+            <div class="metric">
+              <span class="metric-value">20%</span>
+              <span class="metric-label">Prediction Accuracy Gain</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">Daily</span>
+              <span class="metric-label">Automated Updates</span>
+            </div>
+          </div>
+          <div class="project-tech">
+            <span class="tech-chip">Python</span>
+            <span class="tech-chip">XGBoost</span>
+            <span class="tech-chip">GitHub Actions</span>
+            <span class="tech-chip">Google Sheets API</span>
+            <span class="tech-chip">Tableau</span>
+            <span class="tech-chip">FPL REST API</span>
+          </div>
+        </div>
+        <a href="https://docs.google.com/spreadsheets/d/1ajm5wgoI66MSi7FOd_C1pE78VVtlDfdYE8K7zbasRz0/edit?gid=61701544#gid=61701544" target="_blank" class="project-link">
+          View Live Project <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- TWO-COLUMN GRID -->
+    <div class="project-grid">
+
+      <!-- Splendor Hotel Groups -->
+      <div class="project-card reveal">
+        <div class="card-image">
+          <img src="images/SHG_Viz.png" alt="Splendor Hotel Groups SQL Analysis" loading="lazy" />
+        </div>
+        <div class="card-content">
+          <span class="project-tag">SQL · Power BI</span>
+          <h3 class="card-title">Splendor Hotel Groups BI Analysis</h3>
+          <p class="card-desc">
+            End-to-end data exploration across booking records — uncovering seasonal demand patterns, revenue opportunities, and high-risk guest segments. Findings directly informed pricing strategy adjustments.
+          </p>
+          <div class="project-tech" style="margin-bottom:1.25rem">
+            <span class="tech-chip">SQL</span>
+            <span class="tech-chip">Power BI</span>
+            <span class="tech-chip">DAX</span>
+            <span class="tech-chip">Data Modeling</span>
+          </div>
+          <a href="https://github.com/Shegszz/Splendor-Hotel-Groups-Data-Analysis" target="_blank" class="project-link">
+            View on GitHub <span class="arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Customer Churn -->
+      <div class="project-card reveal">
+        <div class="card-image">
+          <img src="images/churn2.png" alt="Customer Churn Analysis" loading="lazy" />
+        </div>
+        <div class="card-content">
+          <span class="project-tag">ML · Analytics</span>
+          <h3 class="card-title">Customer Churn Analysis</h3>
+          <p class="card-desc">
+            Analyzed 5,880 customer records to identify the real drivers of churn. Developed retention strategies projected to save $50K annually. From raw data to boardroom-ready recommendations.
+          </p>
+          <div class="project-tech" style="margin-bottom:1.25rem">
+            <span class="tech-chip">Python</span>
+            <span class="tech-chip">Pandas</span>
+            <span class="tech-chip">Scikit-learn</span>
+            <span class="tech-chip">Data Viz</span>
+          </div>
+          <a href="https://github.com/Shegszz/Customer-Churn-Analysis" target="_blank" class="project-link">
+            View on GitHub <span class="arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TABLEAU CALLOUT -->
+  <div id="tableau">
+    <div class="tableau-banner reveal">
+      <div class="tableau-left">
+        <h3>BI Dashboard Portfolio</h3>
+        <p>E-commerce, HR, Finance, and Marketing datasets — all turned into interactive, decision-ready dashboards on Tableau Public. Explore the full collection.</p>
+      </div>
+      <div class="tableau-bg-text">VIZ</div>
+      <a href="https://public.tableau.com/app/profile/segun.bakare1740/vizzes" target="_blank" class="btn-primary" style="flex-shrink:0;">
+        View All Dashboards <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BOOK A CALL -->
+  <section id="booking">
+    <div class="booking-glow"></div>
+    <div class="booking-inner">
+      <p class="section-label">Let's Talk</p>
+      <h2 class="section-title reveal">Have a problem<br />data can solve?</h2>
+      <p class="reveal">Open to freelance engagements, full-time roles, and interesting conversations. Whether it's a pipeline that's breaking, a dashboard that needs to exist, or a role you want to talk through — reach out.</p>
+      <div class="booking-chips reveal">
+        <span class="booking-chip">Data Analytics</span>
+        <span class="booking-chip">Pipeline Automation</span>
+        <span class="booking-chip">BI & Dashboards</span>
+        <span class="booking-chip">ML Modeling</span>
+        <span class="booking-chip">Freelance</span>
+      </div>
+      <a href="https://calendly.com/segunbakare-d/30min" target="_blank" class="btn-primary reveal" style="display:inline-flex; font-size:1rem; padding:1rem 2.2rem;">
+        Book a 30-Min Call <span class="arrow">↗</span>
+      </a>
+      <p style="margin-top:1.5rem; font-family: var(--font-mono); font-size:0.78rem; color:var(--muted);">
+        Or email directly: <a href="mailto:segunbakare.d@gmail.com" style="color:var(--accent);">segunbakare.d@gmail.com</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p class="footer-left">© 2025 <span>Segun Bakare</span> — Built with intent.</p>
+    <ul class="footer-links">
+      <li><a href="https://www.linkedin.com/in/segun-bakare-d/" target="_blank">LinkedIn</a></li>
+      <li><a href="https://github.com/Shegszz" target="_blank">GitHub</a></li>
+      <li><a href="https://medium.com/@segunbakare.d" target="_blank">Medium</a></li>
+      <li><a href="https://drive.google.com/file/d/1BmHlNCcW4lqzfuQD-Cg5mVDtForwFgXC/view?usp=sharing" target="_blank">Résumé</a></li>
+      <li><a href="https://twitter.com/Segun_B_" target="_blank">X / Twitter</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
+</body>
 </html>
