@@ -544,19 +544,30 @@ function parseCSV(text) {
 }
 
 async function fetchSheet(tabName) {
-  const url = sheetUrl(tabName);
-  // Use no-cors mode as fallback — but first try normal fetch
-  let res;
-  try {
-    res = await fetch(url, { mode: 'cors' });
-  } catch(e) {
-    // Try without explicit mode
-    res = await fetch(url);
+  const direct = sheetUrl(tabName);
+  // Two CORS proxies as fallbacks — if Google blocks direct, one of these will work
+  const proxy1 = `https://corsproxy.io/?${encodeURIComponent(direct)}`;
+  const proxy2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`;
+
+  const attempts = [direct, proxy1, proxy2];
+
+  for (const url of attempts) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (!text || text.trim() === '' || text.includes('Signin')) continue;
+      // Validate it looks like CSV (first char should be a letter or quote)
+      const firstChar = text.trim()[0];
+      if (firstChar !== '"' && !/[a-zA-Z]/.test(firstChar)) continue;
+      return parseCSV(text);
+    } catch(e) {
+      // Try next
+      continue;
+    }
   }
-  if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${tabName}`);
-  const text = await res.text();
-  if (!text || text.trim() === '') throw new Error(`Empty response for ${tabName}`);
-  return parseCSV(text);
+
+  throw new Error(`All fetch attempts failed for sheet: ${tabName}. Make sure the sheet is set to "Anyone with the link can view".`);
 }
 
 // ═══════════════════════════════════════════════════════════
