@@ -495,30 +495,68 @@ body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;fon
 const SHEET_ID = '1ajm5wgoI66MSi7FOd_C1pE78VVtlDfdYE8K7zbasRz0';
 
 function sheetUrl(tabName) {
-  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+  // CSV export — no CORS issues, works from any domain including GitHub Pages
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
 }
 
 // ═══════════════════════════════════════════════════════════
 // GOOGLE SHEETS FETCHER
-// Parses the JSONP wrapper Google returns
+// Uses CSV export endpoint — fully CORS-safe on GitHub Pages.
+// Parses CSV manually to handle quoted fields with commas inside.
 // ═══════════════════════════════════════════════════════════
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  if (lines.length < 2) return [];
+
+  function splitLine(line) {
+    const result = [];
+    let cur = '';
+    let inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+        else inQuote = !inQuote;
+      } else if (ch === ',' && !inQuote) {
+        result.push(cur); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  const headers = splitLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = splitLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => {
+      const v = vals[idx] !== undefined ? vals[idx] : '';
+      // Auto-convert numbers
+      obj[h] = v !== '' && !isNaN(v) && v.trim() !== '' ? Number(v) : v;
+    });
+    rows.push(obj);
+  }
+  return rows;
+}
+
 async function fetchSheet(tabName) {
   const url = sheetUrl(tabName);
-  const res = await fetch(url);
+  // Use no-cors mode as fallback — but first try normal fetch
+  let res;
+  try {
+    res = await fetch(url, { mode: 'cors' });
+  } catch(e) {
+    // Try without explicit mode
+    res = await fetch(url);
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${tabName}`);
   const text = await res.text();
-  // Google wraps JSON in: google.visualization.Query.setResponse({...})
-  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-  if (!json.table || !json.table.rows) return [];
-
-  const cols = json.table.cols.map(c => c.label);
-  return json.table.rows.map(row => {
-    const obj = {};
-    cols.forEach((col, i) => {
-      const cell = row.c[i];
-      obj[col] = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : '') : '';
-    });
-    return obj;
-  });
+  if (!text || text.trim() === '') throw new Error(`Empty response for ${tabName}`);
+  return parseCSV(text);
 }
 
 // ═══════════════════════════════════════════════════════════
