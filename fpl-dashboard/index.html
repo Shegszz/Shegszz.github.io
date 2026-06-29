@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPL Analytics Engine | Segun Bakare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080C18;--surface:#0F1623;--surface2:#151E2E;--surface3:#1C2740;
+  --border:#1E2D47;--border2:#243352;
+  --gold:#D4A017;--gold2:#9B7512;
+  --teal:#00D4AA;--red:#F85149;--amber:#F0AD4E;--purple:#A371F7;--blue:#58A6FF;
+  --text:#E6EDF3;--text2:#8B949E;--text3:#3D4F6B;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;font-size:14px;overflow-x:hidden}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:300;height:54px;background:rgba(8,12,24,0.96);
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-badge{background:var(--gold);color:#000;font-family:'Bebas Neue',sans-serif;
+  font-size:11px;letter-spacing:2px;padding:3px 9px;border-radius:3px}
+.tb-name{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px}
+.tb-right{display:flex;align-items:center;gap:18px}
+.live{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--teal)}
+.dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.gw-pill{background:var(--surface2);border:1px solid var(--border);border-radius:5px;
+  padding:4px 14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)}
+.refresh-btn{background:none;border:1px solid var(--border);border-radius:5px;
+  padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);
+  cursor:pointer;transition:all .2s}
+.refresh-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* NAV */
+.nav{background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;padding:0 28px;overflow-x:auto}
+.nt{padding:14px 22px;font-size:13px;font-weight:600;color:var(--text2);
+  cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;
+  transition:all .2s;display:flex;align-items:center;gap:7px;user-select:none}
+.nt:hover{color:var(--text)}
+.nt.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* PAGES */
+.page{display:none;padding:24px 28px;animation:fadeUp .22s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+/* LOADING SKELETON */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:60px 20px}
+.spinner{width:36px;height:36px;border:3px solid var(--border);
+  border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)}
+.error-box{background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);
+  border-radius:8px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:12px;
+  color:var(--red);margin:20px 0}
+.skeleton{background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* SECTION LABEL */
+.sl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:20px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* KPI CARDS */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:18px 16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+.kpi.teal::before{background:var(--teal)}
+.kpi.red::before{background:var(--red)}
+.kpi.purple::before{background:var(--purple)}
+.kpi.blue::before{background:var(--blue)}
+.kpi-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--text2);margin-bottom:7px}
+.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;margin-bottom:4px}
+.kpi-val.gold{color:var(--gold)}.kpi-val.teal{color:var(--teal)}
+.kpi-val.red{color:var(--red)}.kpi-val.purple{color:var(--purple)}.kpi-val.blue{color:var(--blue)}
+.kpi-delta{font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;gap:4px}
+.up{color:var(--teal)}.dn{color:var(--red)}.dim{color:var(--text2)}.warn{color:var(--amber)}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ct{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px}
+.ctag{font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);
+  background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:18px}
+.g2e{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.mb{margin-bottom:18px}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--text2);padding:7px 10px;
+  text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(30,45,71,0.45);
+  font-family:'DM Mono',monospace;font-size:12px;color:var(--text)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surface2)}
+
+/* POS / AI BADGES */
+.pb{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px}
+.pb-gk{background:rgba(212,160,23,.2);color:var(--gold);border:1px solid var(--gold2)}
+.pb-def{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid #2A4A7A}
+.pb-mid{background:rgba(0,212,170,.12);color:var(--teal);border:1px solid #0A5A48}
+.pb-fwd{background:rgba(248,81,73,.15);color:var(--red);border:1px solid #6A2020}
+.ar{display:inline-block;font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px}
+.ar-p{background:rgba(0,212,170,.15);color:var(--teal);border:1px solid rgba(0,212,170,.3)}
+.ar-g{background:rgba(212,160,23,.15);color:var(--gold);border:1px solid rgba(212,160,23,.3)}
+.ar-a{background:rgba(240,173,78,.12);color:var(--amber);border:1px solid rgba(240,173,78,.3)}
+.ar-m{background:rgba(139,148,158,.12);color:var(--text2);border:1px solid rgba(139,148,158,.2)}
+.ar-av{background:rgba(248,81,73,.12);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+
+/* CHIP BADGES */
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;
+  font-size:9px;padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+.c-wc{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
+.c-fh{background:rgba(0,212,170,.15);color:var(--teal);border:1px solid rgba(0,212,170,.3)}
+.c-bb{background:rgba(240,173,78,.15);color:var(--amber);border:1px solid rgba(240,173,78,.3)}
+.c-tc{background:rgba(163,113,247,.15);color:var(--purple);border:1px solid rgba(163,113,247,.3)}
+
+/* CAPTAIN PODIUM */
+.cap-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.cap-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:18px;text-align:center}
+.cap-card.gold-border{border-color:var(--gold);background:linear-gradient(150deg,#1A1200,var(--surface) 55%)}
+.cap-crown{font-size:22px;margin-bottom:6px}
+.cap-name{font-weight:700;font-size:14px;margin-bottom:3px}
+.cap-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:10px}
+.cap-score{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--gold);line-height:1}
+.cap-slabel{font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);margin-bottom:8px}
+.cap-pills{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.cp{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:10px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+.cp.g{color:var(--teal);border-color:rgba(0,212,170,.3);background:rgba(0,212,170,.08)}
+.cp.w{color:var(--amber);border-color:rgba(240,173,78,.3);background:rgba(240,173,78,.08)}
+
+/* TRANSFER CARDS */
+.pc{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:13px;display:flex;align-items:center;gap:12px;margin-bottom:8px;
+  transition:border-color .2s,transform .15s;cursor:pointer}
+.pc:hover{border-color:var(--gold);transform:translateY(-1px)}
+.pav{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0}
+.pi{flex:1;min-width:0}
+.pn{font-weight:700;font-size:13px;margin-bottom:2px}
+.ps{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)}
+.pstat .v{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1}
+.pstat .l{font-family:'DM Mono',monospace;font-size:9px;color:var(--text2)}
+
+/* FDR HEATMAP */
+.fdrt{width:100%;border-collapse:separate;border-spacing:3px}
+.fdrt th{font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);
+  padding:5px 4px;text-align:center;letter-spacing:.8px}
+.fdrt td{padding:5px 3px;text-align:center;font-family:'DM Mono',monospace;
+  font-size:9px;font-weight:600;border-radius:4px;min-width:58px}
+.fdrt .tn{text-align:left;padding-left:8px;font-size:11px;font-weight:600;
+  white-space:nowrap;background:transparent!important;color:var(--text)}
+
+/* STAT PILLS */
+.strow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.stpill{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  padding:10px 14px;display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px}
+.stl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text2)}
+.stv{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1}
+
+/* CAREER SEASONS */
+.seas-row{display:flex;gap:10px;margin-bottom:18px}
+.seas{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:13px 14px;position:relative;overflow:hidden}
+.seas.best{border-color:var(--gold);background:linear-gradient(135deg,#1A1200,var(--surface2) 60%)}
+.seas.best::after{content:'★ BEST';position:absolute;top:7px;right:8px;
+  font-family:'DM Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:1px}
+.sy{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:5px}
+.sp{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;margin-bottom:2px}
+.sr{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)}
+.sbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px}
+.sbf{height:100%;border-radius:2px;background:var(--gold)}
+
+/* RANK LIST */
+.rlist{display:flex;flex-direction:column;gap:10px}
+.ri{display:flex;align-items:center;gap:11px}
+.rn{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text2);
+  width:24px;text-align:right;flex-shrink:0}
+.rn.g{color:var(--gold)}
+.rinfo{flex:1;min-width:0}
+.rname{font-weight:600;font-size:13px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmeta{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)}
+.rscore{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);flex-shrink:0}
+
+/* GW SELECTOR */
+.gw-sel{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.gw-sel label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:1px}
+.gw-sel select{background:var(--surface2);border:1px solid var(--border);border-radius:5px;
+  color:var(--text);font-family:'DM Mono',monospace;font-size:12px;
+  padding:5px 12px;cursor:pointer;outline:none}
+.gw-sel select:focus{border-color:var(--gold)}
+
+/* BC BAR CELL */
+.bc{display:flex;align-items:center;gap:7px}
+.bt{flex:1;height:4px;background:var(--surface3);border-radius:2px}
+.bf{height:100%;border-radius:2px;background:var(--teal)}
+
+/* BEST XI GRID */
+.xi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.xi-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:12px;text-align:center}
+
+/* FOOTER */
+.footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center}
+.fb{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text3)}
+.fm{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+.scroll{overflow-x:auto}
+
+@media(max-width:900px){
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .g2,.g2e,.g3,.cap-row{grid-template-columns:1fr}
+  .seas-row{flex-wrap:wrap}
+  .topbar,.nav,.page{padding-left:16px;padding-right:16px}
+}
+@media(max-width:560px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="tb-left">
+    <span class="tb-badge">FPL</span>
+    <span class="tb-name">Analytics Engine</span>
+  </div>
+  <div class="tb-right">
+    <div class="live"><div class="dot"></div>Live Data</div>
+    <div class="gw-pill" id="topGwPill">Loading...</div>
+    <button class="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nt active" data-tab="season" onclick="switchTab('season')">🏆 My Season</div>
+  <div class="nt" data-tab="intel" onclick="switchTab('intel')">🔍 Player Intelligence</div>
+  <div class="nt" data-tab="transfers" onclick="switchTab('transfers')">⚡ Transfer Lab</div>
+  <div class="nt" data-tab="fixtures" onclick="switchTab('fixtures')">📅 Fixture Planner</div>
+</nav>
+
+<!-- PAGE 1: MY SEASON -->
+<section class="page active" id="page-season">
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-lbl">Total Points</div>
+      <div class="kpi-val gold" id="k-pts">—</div>
+      <div class="kpi-delta dim" id="k-pts-d">Loading...</div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-lbl">Overall Rank</div>
+      <div class="kpi-val teal" id="k-rank">—</div>
+      <div class="kpi-delta" id="k-rank-d">Loading...</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-lbl">Team Value</div>
+      <div class="kpi-val blue" id="k-val">—</div>
+      <div class="kpi-delta" id="k-val-d">Loading...</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-lbl">xP vs Average</div>
+      <div class="kpi-val" id="k-xp">—</div>
+      <div class="kpi-delta" id="k-xp-d">Loading...</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-lbl">Free Transfers</div>
+      <div class="kpi-val purple" id="k-ft">—</div>
+      <div class="kpi-delta" id="k-ft-d">Loading...</div>
+    </div>
+  </div>
+
+  <!-- STAT PILLS -->
+  <div class="strow" id="statPills">
+    <div class="stpill"><span class="stl">Best GW</span><div class="skeleton stv" style="height:24px;width:60px">&nbsp;</div></div>
+    <div class="stpill"><span class="stl">Worst GW</span><div class="skeleton stv" style="height:24px;width:60px">&nbsp;</div></div>
+    <div class="stpill"><span class="stl">Avg GW pts</span><div class="skeleton stv" style="height:24px;width:60px">&nbsp;</div></div>
+    <div class="stpill"><span class="stl">GWs Above 70</span><div class="skeleton stv" style="height:24px;width:40px">&nbsp;</div></div>
+    <div class="stpill"><span class="stl">Best Rank</span><div class="skeleton stv" style="height:24px;width:80px">&nbsp;</div></div>
+    <div class="stpill"><span class="stl">Pts on Bench</span><div class="skeleton stv" style="height:24px;width:60px">&nbsp;</div></div>
+    <div class="stpill"><span class="stl">Chips Used</span><div class="skeleton stv" style="height:24px;width:40px">&nbsp;</div></div>
+    <div class="stpill"><span class="stl">Hits Cost</span><div class="skeleton stv" style="height:24px;width:60px">&nbsp;</div></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><span class="ct">Rank Trajectory</span><span class="ctag" id="rankChartTag">Loading...</span></div>
+      <canvas id="rankChart" height="210"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">Points by Gameweek</span><span class="ctag">Red = Hit taken</span></div>
+      <canvas id="ptsChart" height="210"></canvas>
+    </div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><span class="ct">Cumulative Points</span><span class="ctag">Running total</span></div>
+      <canvas id="cumChart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">Team Value</span><span class="ctag">£m per GW</span></div>
+      <canvas id="valChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- CHIPS -->
+  <div class="sl">Chips Timeline</div>
+  <div class="card mb" id="chipsRow">
+    <div class="loading"><div class="spinner"></div><div class="loading-text">Loading chips...</div></div>
+  </div>
+
+  <!-- CAREER -->
+  <div class="sl">Career History — 5 Seasons</div>
+  <div class="seas-row" id="seasonsRow">
+    <div class="seas"><div class="skeleton" style="height:80px"></div></div>
+    <div class="seas"><div class="skeleton" style="height:80px"></div></div>
+    <div class="seas"><div class="skeleton" style="height:80px"></div></div>
+    <div class="seas"><div class="skeleton" style="height:80px"></div></div>
+    <div class="seas"><div class="skeleton" style="height:80px"></div></div>
+  </div>
+
+  <!-- GW TABLE -->
+  <div class="sl">Gameweek by Gameweek</div>
+  <div class="card scroll">
+    <div id="gwTableWrap">
+      <div class="loading"><div class="spinner"></div><div class="loading-text">Loading gameweek data...</div></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="fb">FPL Analytics Engine · Segun Bakare</div>
+    <div class="fm" id="lastUpdated">Team ID: 2551369 · Refreshing...</div>
+  </div>
+</section>
+
+<!-- PAGE 2: PLAYER INTELLIGENCE -->
+<section class="page" id="page-intel">
+  <div class="gw-sel">
+    <label>POSITION</label>
+    <select id="posSel" onchange="renderIntel()">
+      <option value="ALL">All Positions</option>
+      <option value="Goalkeeper">GK</option>
+      <option value="Defender">DEF</option>
+      <option value="Midfielder">MID</option>
+      <option value="Forward">FWD</option>
+    </select>
+    <label>MIN xP</label>
+    <select id="xpSel" onchange="renderIntel()">
+      <option value="0">All</option>
+      <option value="5">5+</option>
+      <option value="7">7+</option>
+      <option value="9">9+</option>
+    </select>
+    <label>AI RATING</label>
+    <select id="aiSel" onchange="renderIntel()">
+      <option value="ALL">All</option>
+      <option value="Premium">Premium</option>
+      <option value="Good">Good</option>
+      <option value="Average">Average</option>
+    </select>
+  </div>
+
+  <div class="g2">
+    <div class="card" style="position:relative">
+      <div class="ch"><span class="ct">Intelligence Matrix</span><span class="ctag">xP vs FD Index · Bubble = AI Rating</span></div>
+      <canvas id="scatterChart" height="300"></canvas>
+      <div style="position:absolute;pointer-events:none;top:52px;left:20px;right:20px;bottom:20px">
+        <div style="position:absolute;top:8px;left:12px;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--teal);opacity:.4;border:1px solid var(--teal);padding:2px 6px;border-radius:3px">GOLDMINE</div>
+        <div style="position:absolute;top:8px;right:12px;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--amber);opacity:.4;border:1px solid var(--amber);padding:2px 6px;border-radius:3px">WATCH LIST</div>
+        <div style="position:absolute;bottom:8px;left:12px;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--purple);opacity:.4;border:1px solid var(--purple);padding:2px 6px;border-radius:3px">RISING</div>
+        <div style="position:absolute;bottom:8px;right:12px;font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:var(--red);opacity:.4;border:1px solid var(--red);padding:2px 6px;border-radius:3px">AVOID</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card" style="flex:1">
+        <div class="ch"><span class="ct">Top AI Picks</span><span class="ctag">Next GW</span></div>
+        <div class="rlist" id="topAI"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+      <div class="card" style="flex:1">
+        <div class="ch"><span class="ct">Top Differentials</span><span class="ctag">&lt;15% Owned</span></div>
+        <div class="rlist" id="topDiff"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sl">Best Starting XI — Next GW</div>
+  <div class="card mb">
+    <div class="ch"><span class="ct">Recommended XI</span><span class="ctag">4-3-3 · Sorted by xP</span></div>
+    <div class="xi-grid" id="bestXI"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+
+  <div class="sl">Full Player Intelligence</div>
+  <div class="card scroll">
+    <div id="intelTableWrap"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading player data...</div></div></div>
+  </div>
+
+  <div class="footer">
+    <div class="fb">FPL Analytics Engine</div>
+    <div class="fm">XGBoost · GBM · RF Ensemble · Position-specific · Daily refresh</div>
+  </div>
+</section>
+
+<!-- PAGE 3: TRANSFER LAB -->
+<section class="page" id="page-transfers">
+  <div class="sl">Captaincy Candidates</div>
+  <div class="cap-row" id="capRow"><div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div></div>
+
+  <div class="g2e">
+    <div>
+      <div class="sl">Transfer In — Best Value Picks</div>
+      <div id="transferIn"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <div>
+      <div class="sl">Transfer Out — Sell Alerts</div>
+      <div id="transferOut"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+
+  <div class="sl">Net Transfer Movement</div>
+  <div class="card">
+    <div class="ch"><span class="ct">Transfer Activity</span><span class="ctag">+ve = Being Bought · −ve = Sold</span></div>
+    <canvas id="xferChart" height="220"></canvas>
+  </div>
+
+  <div class="footer">
+    <div class="fb">FPL Analytics Engine</div>
+    <div class="fm">Transfer scores: xP 40% · FDR 40% · PPG 20%</div>
+  </div>
+</section>
+
+<!-- PAGE 4: FIXTURE PLANNER -->
+<section class="page" id="page-fixtures">
+  <div class="g2">
+    <div class="card">
+      <div class="ch">
+        <span class="ct">FDR Heatmap — Next 8 GWs</span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:#375523;color:#01FC7A">1 EASY</span>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:#01FC7A22;color:#01FC7A;border:1px solid #01FC7A44">2 GOOD</span>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:#E7E7E722;color:#E7E7E7;border:1px solid #E7E7E744">3 MED</span>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:#FF175122;color:#FF1751;border:1px solid #FF175144">4 HARD</span>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:#80072D44;color:#FF6B6B;border:1px solid #80072D88">5 BRUTAL</span>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:#DAA52033;color:#DAA520;border:1px solid #DAA52066">DGW ⚡</span>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;border-radius:3px;background:#4A4A4A33;color:#8B949E;border:1px solid #4A4A4A66">BGW —</span>
+        </div>
+      </div>
+      <div class="scroll" id="fdrWrap"><div class="loading"><div class="spinner"></div><div class="loading-text">Loading fixtures...</div></div></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">DGW / BGW Tracker</span></div>
+      <div id="dgwTracker"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><span class="ct">Best Fixture Run — Next 5 GWs</span><span class="ctag">Lower avg FDR = easier</span></div>
+      <canvas id="fdrAvgChart" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct">My Squad Fixture View</span><span class="ctag">Next 4 GWs</span></div>
+      <div class="scroll" id="squadFdrWrap"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="fb">FPL Analytics Engine</div>
+    <div class="fm">FDR: FPL official colours · DGW/BGW auto-detected · Daily refresh</div>
+  </div>
+</section>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG — your real Sheet ID, tabs by name
+// ═══════════════════════════════════════════════════════════
+const SHEET_ID = '1ajm5wgoI66MSi7FOd_C1pE78VVtlDfdYE8K7zbasRz0';
+
+function sheetUrl(tabName) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// GOOGLE SHEETS FETCHER
+// Parses the JSONP wrapper Google returns
+// ═══════════════════════════════════════════════════════════
+async function fetchSheet(tabName) {
+  const url = sheetUrl(tabName);
+  const res = await fetch(url);
+  const text = await res.text();
+  // Google wraps JSON in: google.visualization.Query.setResponse({...})
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+  if (!json.table || !json.table.rows) return [];
+
+  const cols = json.table.cols.map(c => c.label);
+  return json.table.rows.map(row => {
+    const obj = {};
+    cols.forEach((col, i) => {
+      const cell = row.c[i];
+      obj[col] = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : '') : '';
+    });
+    return obj;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATE — all loaded data stored here
+// ═══════════════════════════════════════════════════════════
+const STATE = {
+  kpi: null,
+  history: [],
+  squad: [],
+  players: [],
+  fixtures: [],
+  loaded: { season: false, intel: false, transfers: false, fixtures: false }
+};
+
+// Chart instances — destroyed before rebuild to avoid canvas reuse errors
+const CHARTS = {};
+function destroyChart(id) {
+  if (CHARTS[id]) { CHARTS[id].destroy(); delete CHARTS[id]; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHART DEFAULTS
+// ═══════════════════════════════════════════════════════════
+Chart.defaults.color = '#8B949E';
+Chart.defaults.borderColor = '#1E2D47';
+Chart.defaults.font.family = 'DM Mono, monospace';
+Chart.defaults.font.size = 11;
+
+// ═══════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════
+function switchTab(t) {
+  document.querySelectorAll('.nt').forEach(n => n.classList.toggle('active', n.dataset.tab === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + t));
+  if (t === 'intel'    && !STATE.loaded.intel)     loadIntel();
+  if (t === 'transfers'&& !STATE.loaded.transfers) loadTransfers();
+  if (t === 'fixtures' && !STATE.loaded.fixtures)  loadFixtures();
+}
+
+// ═══════════════════════════════════════════════════════════
+// REFRESH ALL — re-fetches everything
+// ═══════════════════════════════════════════════════════════
+async function refreshAll() {
+  STATE.loaded = { season: false, intel: false, transfers: false, fixtures: false };
+  await loadSeason();
+  const activeTab = document.querySelector('.nt.active')?.dataset.tab;
+  if (activeTab === 'intel')     { STATE.loaded.intel = false;     await loadIntel(); }
+  if (activeTab === 'transfers') { STATE.loaded.transfers = false; await loadTransfers(); }
+  if (activeTab === 'fixtures')  { STATE.loaded.fixtures = false;  await loadFixtures(); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+const n = v => Number(v) || 0;
+const s = v => String(v || '');
+const fmt = v => Number(v).toLocaleString();
+
+function posClass(p) {
+  const pos = s(p).toLowerCase();
+  if (pos.includes('goal')) return 'pb-gk';
+  if (pos.includes('def'))  return 'pb-def';
+  if (pos.includes('mid'))  return 'pb-mid';
+  return 'pb-fwd';
+}
+function posShort(p) {
+  const pos = s(p).toLowerCase();
+  if (pos.includes('goal')) return 'GK';
+  if (pos.includes('def'))  return 'DEF';
+  if (pos.includes('mid'))  return 'MID';
+  return 'FWD';
+}
+function posColor(p) {
+  const ps = posShort(p);
+  return ps==='GK'?'#D4A017':ps==='DEF'?'#58A6FF':ps==='MID'?'#00D4AA':'#F85149';
+}
+function posAvBg(p) {
+  const ps = posShort(p);
+  return ps==='GK'?'rgba(212,160,23,.15)':ps==='DEF'?'rgba(88,166,255,.15)':ps==='MID'?'rgba(0,212,170,.12)':'rgba(248,81,73,.15)';
+}
+function arClass(r) {
+  return r==='Premium'?'ar-p':r==='Good'?'ar-g':r==='Average'?'ar-a':r==='Monitor'?'ar-m':'ar-av';
+}
+function chipClass(c) {
+  const lc = s(c).toLowerCase();
+  if (lc.includes('wildcard') || lc === 'wc') return 'c-wc';
+  if (lc.includes('freehit')  || lc === 'fh' || lc.includes('free')) return 'c-fh';
+  if (lc.includes('bboost')   || lc === 'bb' || lc.includes('bench')) return 'c-bb';
+  if (lc.includes('3xc')      || lc === 'tc' || lc.includes('triple')) return 'c-tc';
+  return 'c-wc';
+}
+function chipLabel(c) {
+  const lc = s(c).toLowerCase();
+  if (lc.includes('wildcard') || lc === 'wc') return 'WILDCARD';
+  if (lc.includes('freehit')  || lc === 'fh' || lc.includes('free')) return 'FREE HIT';
+  if (lc.includes('bboost')   || lc === 'bb' || lc.includes('bench')) return 'BENCH BOOST';
+  if (lc.includes('3xc')      || lc === 'tc' || lc.includes('triple')) return 'TRIPLE CAP';
+  return s(c).toUpperCase();
+}
+
+// FDR cell style — exact FPL official colours
+function fdrStyle(fdrVal, type) {
+  if (type === 'BGW') return `background:#4A4A4A;color:#8B949E`;
+  if (type === 'DGW') return `background:#DAA520;color:#000;font-weight:700`;
+  const v = parseInt(fdrVal);
+  if (v === 1) return `background:#375523;color:#01FC7A`;
+  if (v === 2) return `background:#01FC7A;color:#0A1A0A`;
+  if (v === 3) return `background:#E7E7E7;color:#1A1A1A`;
+  if (v === 4) return `background:#FF1751;color:#fff`;
+  if (v === 5) return `background:#80072D;color:#FFB3C6`;
+  return `background:var(--surface2);color:var(--text2)`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE 1 — MY SEASON
+// ═══════════════════════════════════════════════════════════
+async function loadSeason() {
+  try {
+    // Fetch KPI summary (single row) and full history in parallel
+    const [kpiRows, histRows] = await Promise.all([
+      fetchSheet('My FPL - KPI Summary'),
+      fetchSheet('My FPL - Season History'),
+    ]);
+
+    STATE.kpi     = kpiRows[0] || {};
+    STATE.history = histRows;
+
+    renderKPIs();
+    renderStatPills();
+    renderSeasonCharts();
+    renderChips();
+    renderCareerSeasons();
+    renderGWTable();
+
+    STATE.loaded.season = true;
+
+    const upd = s(STATE.kpi['Last Updated']) || new Date().toUTCString();
+    document.getElementById('lastUpdated').textContent =
+      `Team ID: 2551369 · Last updated: ${upd}`;
+
+  } catch (e) {
+    console.error('Season load error:', e);
+    document.getElementById('gwTableWrap').innerHTML =
+      `<div class="error-box">⚠️ Could not load data. Check the sheet is set to public viewer.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderKPIs() {
+  const k = STATE.kpi;
+  if (!k) return;
+
+  // Total Points
+  document.getElementById('k-pts').textContent = fmt(n(k['Total Points']));
+  document.getElementById('k-pts-d').innerHTML =
+    `<span class="dim">${s(k['GW Points Delta Display']) || '+' + n(k['GW Points']) + ' pts this GW'}</span>`;
+
+  // Overall Rank
+  document.getElementById('k-rank').textContent = '#' + fmt(n(k['Overall Rank']));
+  const rankChg = n(k['Rank Change']);
+  const rankDir = s(k['Rank Direction']);
+  const rankClass = rankChg > 0 ? 'up' : rankChg < 0 ? 'dn' : 'dim';
+  const rankDelta = s(k['Rank Delta Display']) || (rankChg > 0 ? `↑ +${fmt(rankChg)}` : rankChg < 0 ? `↓ ${fmt(rankChg)}` : '→');
+  document.getElementById('k-rank-d').innerHTML = `<span class="${rankClass}">${rankDelta} this GW</span>`;
+
+  // Team Value
+  document.getElementById('k-val').textContent = `£${n(k['Team Value']).toFixed(1)}m`;
+  document.getElementById('k-val-d').innerHTML = `<span class="dim">£${n(k['Money In Bank']).toFixed(1)}m in bank</span>`;
+
+  // xP vs Average
+  const xpVal = n(k['xP Starting XI']);
+  const xpAvg = n(k['GW Average']);
+  const xpVsAvg = n(k['xP vs Average']);
+  document.getElementById('k-xp').textContent = xpVal.toFixed(1);
+  document.getElementById('k-xp').className = 'kpi-val ' + (xpVsAvg >= 0 ? 'teal' : 'red');
+  document.getElementById('k-xp-d').innerHTML =
+    `<span class="${xpVsAvg >= 0 ? 'up' : 'dn'}">${s(k['xP vs Avg Display']) || (xpVsAvg >= 0 ? '+' + xpVsAvg : xpVsAvg) + ' vs avg'}</span>`;
+
+  // Free Transfers
+  const ft = n(k['Free Transfers Next GW']);
+  const hit = n(k['Hit Cost This GW']);
+  document.getElementById('k-ft').textContent = ft;
+  document.getElementById('k-ft-d').innerHTML = hit > 0
+    ? `<span class="dn">${s(k['Hit Display']) || '-' + hit + ' pts hit taken'}</span>`
+    : `<span class="dim">No hit taken this GW</span>`;
+
+  // Topbar GW pill
+  const gw = n(k['Current Gameweek']);
+  document.getElementById('topGwPill').textContent = gw ? `GW${gw} · 2025/26` : '2025/26';
+}
+
+function renderStatPills() {
+  const h = STATE.history;
+  if (!h.length) return;
+
+  const pts       = h.map(r => n(r['GW Points']));
+  const benchPts  = h.map(r => n(r['Points On Bench']));
+  const hitsCost  = h.map(r => n(r['Transfers Cost (Hits)']));
+  const ranks     = h.map(r => n(r['Overall Rank'])).filter(r => r > 0);
+  const chips     = h.filter(r => s(r['Chip Used']));
+  const aboveAvg  = h.filter(r => n(r['Points vs Average']) > 0).length;
+  const gw70      = pts.filter(p => p >= 70).length;
+  const bestPts   = Math.max(...pts);
+  const worstPts  = Math.min(...pts);
+  const avgPts    = (pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(1);
+  const totalBench = benchPts.reduce((a, b) => a + b, 0);
+  const totalHits  = hitsCost.reduce((a, b) => a + b, 0);
+  const bestRank   = Math.min(...ranks);
+  const bestGW     = h[pts.indexOf(bestPts)]?.['Gameweek'];
+  const worstGW    = h[pts.indexOf(worstPts)]?.['Gameweek'];
+  const bestRankGW = h[ranks.indexOf(bestRank)]?.['Gameweek'];
+
+  document.getElementById('statPills').innerHTML = `
+    <div class="stpill"><span class="stl">Best GW</span><span class="stv" style="color:var(--teal)">${bestPts} pts</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">GW${bestGW}</span></div>
+    <div class="stpill"><span class="stl">Worst GW</span><span class="stv" style="color:var(--red)">${worstPts} pts</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">GW${worstGW}</span></div>
+    <div class="stpill"><span class="stl">Avg GW pts</span><span class="stv" style="color:var(--gold)">${avgPts}</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">net of hits</span></div>
+    <div class="stpill"><span class="stl">GWs Above 70</span><span class="stv" style="color:var(--teal)">${gw70}</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">of ${pts.length} played</span></div>
+    <div class="stpill"><span class="stl">Best Rank</span><span class="stv" style="color:var(--gold)">#${bestRank >= 1000 ? (bestRank/1000).toFixed(0)+'K' : bestRank}</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">GW${bestRankGW}</span></div>
+    <div class="stpill"><span class="stl">Pts on Bench</span><span class="stv" style="color:var(--red)">${totalBench}</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">left on table</span></div>
+    <div class="stpill"><span class="stl">Chips Used</span><span class="stv" style="color:var(--purple)">${chips.length}/7</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">deployed</span></div>
+    <div class="stpill"><span class="stl">Hits Cost</span><span class="stv" style="color:var(--red)">-${totalHits}pts</span><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">${hitsCost.filter(h=>h>0).length} hits taken</span></div>
+  `;
+}
+
+function renderSeasonCharts() {
+  const h = STATE.history;
+  if (!h.length) return;
+
+  const labels = h.map(r => 'GW' + n(r['Gameweek']));
+  const pts    = h.map(r => n(r['GW Points']));
+  const cum    = h.map(r => n(r['Cumulative Points']));
+  const ranks  = h.map(r => n(r['Overall Rank']));
+  const vals   = h.map(r => n(r['Team Value']));
+  const hits   = h.map(r => n(r['Transfers Cost (Hits)']));
+  const chips  = {};
+  h.forEach(r => { if (s(r['Chip Used'])) chips[r['Gameweek']] = s(r['Chip Used']); });
+
+  const chipColors = {
+    'Free Hit': '#00D4AA', 'Freehit': '#00D4AA',
+    'Wildcard': '#58A6FF',
+    'Bboost': '#F0AD4E', 'Bench Boost': '#F0AD4E',
+    '3Xc': '#A371F7', 'Triple Captain': '#A371F7',
+  };
+  function chipColor(name) {
+    for (const [k,v] of Object.entries(chipColors)) {
+      if (name.toLowerCase().includes(k.toLowerCase())) return v;
+    }
+    return '#D4A017';
+  }
+
+  // Chip annotations for rank chart
+  const ann = {};
+  Object.entries(chips).forEach(([gw, chip]) => {
+    const idx = h.findIndex(r => String(r['Gameweek']) === String(gw));
+    if (idx < 0) return;
+    const col = chipColor(chip);
+    ann['c' + gw] = {
+      type: 'line', xMin: idx, xMax: idx,
+      borderColor: col, borderWidth: 1.5, borderDash: [4, 3],
+      label: {
+        content: chipLabel(chip) + ' GW' + gw, display: true, position: 'start',
+        backgroundColor: col + '22', color: col,
+        font: { family: 'DM Mono, monospace', size: 8 },
+        padding: { x: 4, y: 2 }, borderRadius: 3
+      }
+    };
+  });
+
+  document.getElementById('rankChartTag').textContent =
+    'Chip markers · Inverted · GW1–' + h.length;
+
+  // Rank chart
+  destroyChart('rank');
+  CHARTS.rank = new Chart(document.getElementById('rankChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: ranks, borderColor: '#D4A017',
+        backgroundColor: 'rgba(212,160,23,0.05)',
+        borderWidth: 2, fill: true, tension: 0.4,
+        pointRadius: h.map(r => s(r['Chip Used']) ? 6 : 0),
+        pointBackgroundColor: h.map(r => {
+          const c = s(r['Chip Used']); return c ? chipColor(c) : '#D4A017';
+        }),
+        pointHoverRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: ann },
+        tooltip: { callbacks: { label: c => '#' + c.raw.toLocaleString() } }
+      },
+      scales: {
+        y: {
+          reverse: true, grid: { color: '#1E2D4755' },
+          ticks: { callback: v => v >= 1e6 ? '#' + (v/1e6).toFixed(1)+'M' : v >= 1000 ? '#' + (v/1000).toFixed(0)+'K' : '#'+v }
+        },
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } }
+      }
+    }
+  });
+
+  // Points bar chart
+  destroyChart('pts');
+  CHARTS.pts = new Chart(document.getElementById('ptsChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: pts, borderRadius: 3,
+        backgroundColor: pts.map((p, i) =>
+          hits[i] > 0 ? 'rgba(248,81,73,0.78)' :
+          p >= 70 ? 'rgba(0,212,170,0.75)' :
+          p >= 50 ? 'rgba(212,160,23,0.70)' :
+          'rgba(88,166,255,0.50)'
+        )
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => {
+          const hit = hits[c.dataIndex];
+          return hit > 0 ? `${c.raw} pts (−${hit} hit)` : `${c.raw} pts`;
+        }}}
+      },
+      scales: { y: { grid: { color: '#1E2D4755' } }, x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } } }
+    }
+  });
+
+  // Cumulative chart
+  destroyChart('cum');
+  CHARTS.cum = new Chart(document.getElementById('cumChart'), {
+    type: 'line',
+    data: { labels, datasets: [{ data: cum, borderColor: '#A371F7', backgroundColor: 'rgba(163,113,247,0.07)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1E2D4755' } }, x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } } } }
+  });
+
+  // Value chart
+  destroyChart('val');
+  CHARTS.val = new Chart(document.getElementById('valChart'), {
+    type: 'line',
+    data: { labels, datasets: [{ data: vals, borderColor: '#58A6FF', backgroundColor: 'rgba(88,166,255,0.06)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `£${c.raw}m` } } },
+      scales: {
+        y: { grid: { color: '#1E2D4755' }, ticks: { callback: v => `£${v}m` } },
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }
+      }
+    }
+  });
+}
+
+function renderChips() {
+  const h = STATE.history.filter(r => s(r['Chip Used']));
+  if (!h.length) {
+    document.getElementById('chipsRow').innerHTML = '<div class="dim" style="font-family:\'DM Mono\',monospace;font-size:12px">No chips data available.</div>';
+    return;
+  }
+  const html = h.map(r => {
+    const chip = s(r['Chip Used']);
+    const gw   = n(r['Gameweek']);
+    const pts  = n(r['GW Points']);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+      <span class="chip ${chipClass(chip)}">${chipLabel(chip)}</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold)">GW${gw}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">${pts} pts</span>
+    </div>`;
+  }).join('');
+  document.getElementById('chipsRow').innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:10px">${html}</div>`;
+}
+
+function renderCareerSeasons() {
+  // Static past seasons data (FPL API /history/ past array — not in sheets)
+  const past = [
+    { y: '2021/22', pts: 1572, rank: 6913010, col: 'var(--text2)', w: 66, isBest: false },
+    { y: '2022/23', pts: 2245, rank: 2152583, col: 'var(--teal)',  w: 94, isBest: false },
+    { y: '2023/24', pts: 2059, rank: 4068921, col: 'var(--blue)',  w: 86, isBest: false },
+    { y: '2024/25', pts: 2388, rank: 661087,  col: 'var(--gold)',  w: 100, isBest: true },
+    { y: '2025/26', pts: n(STATE.kpi?.['Total Points']) || 2077, rank: n(STATE.kpi?.['Overall Rank']) || 2663537, col: 'var(--purple)', w: 87, isBest: false, current: true },
+  ];
+  document.getElementById('seasonsRow').innerHTML = past.map(s => `
+    <div class="seas${s.isBest ? ' best' : ''}" style="${s.current ? 'border-color:var(--purple)' : ''}">
+      <div class="sy">${s.y}${s.current ? ' ←' : ''}</div>
+      <div class="sp" style="color:${s.col}">${s.pts.toLocaleString()}</div>
+      <div class="sr">#${s.rank.toLocaleString()}</div>
+      <div class="sbar"><div class="sbf" style="width:${s.w}%;background:${s.col}"></div></div>
+    </div>
+  `).join('');
+}
+
+function renderGWTable() {
+  const h = STATE.history;
+  if (!h.length) return;
+  let html = `<table class="tbl"><thead><tr>
+    <th>GW</th><th>Pts</th><th>Hit</th><th>Net</th><th>Total</th>
+    <th>Rank</th><th>Δ Rank</th><th>Value</th><th>Bench</th>
+    <th>vs Avg</th><th>Chip</th>
+  </tr></thead><tbody>`;
+
+  h.forEach((r, i) => {
+    const gw    = n(r['Gameweek']);
+    const pts   = n(r['GW Points']);
+    const hit   = n(r['Transfers Cost (Hits)']);
+    const net   = n(r['Net GW Points']);
+    const total = n(r['Cumulative Points']);
+    const rank  = n(r['Overall Rank']);
+    const val   = n(r['Team Value']);
+    const bench = n(r['Points On Bench']);
+    const vsAvg = n(r['Points vs Average']);
+    const chip  = s(r['Chip Used']);
+    const rankDir = s(r['Rank Delta Display']);
+
+    const ptsC  = pts >= 70 ? 'up' : pts < 35 ? 'dn' : '';
+    const netC  = net >= 60 ? 'up' : net < 30 ? 'dn' : '';
+    const rankC = rankDir.startsWith('↑') ? 'up' : rankDir.startsWith('↓') ? 'dn' : 'dim';
+    const avgC  = vsAvg > 0 ? 'up' : vsAvg < 0 ? 'dn' : 'dim';
+
+    html += `<tr>
+      <td class="dim">GW${gw}</td>
+      <td class="${ptsC}">${pts}</td>
+      <td>${hit > 0 ? `<span class="dn">-${hit}</span>` : '<span class="dim">—</span>'}</td>
+      <td class="${netC}">${net}</td>
+      <td style="color:var(--purple)">${total}</td>
+      <td class="dim">#${rank.toLocaleString()}</td>
+      <td><span class="${rankC}" style="font-size:11px">${rankDir || '—'}</span></td>
+      <td style="color:var(--blue)">£${val}m</td>
+      <td style="color:${bench>15?'var(--red)':bench>8?'var(--amber)':'var(--text2)'}">${bench}</td>
+      <td><span class="${avgC}">${vsAvg > 0 ? '+' + vsAvg : vsAvg}</span></td>
+      <td>${chip ? `<span class="chip ${chipClass(chip)}">${chipLabel(chip)}</span>` : ''}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('gwTableWrap').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE 2 — PLAYER INTELLIGENCE
+// ═══════════════════════════════════════════════════════════
+async function loadIntel() {
+  try {
+    STATE.players = await fetchSheet('Player Data');
+    renderIntel();
+    STATE.loaded.intel = true;
+  } catch (e) {
+    document.getElementById('intelTableWrap').innerHTML =
+      `<div class="error-box">⚠️ Could not load Player Data sheet.<br><small>${e.message}</small></div>`;
+  }
+}
+
+let scatterChart = null;
+function renderIntel() {
+  const posFil = document.getElementById('posSel')?.value || 'ALL';
+  const xpFil  = parseFloat(document.getElementById('xpSel')?.value || 0);
+  const aiFil  = document.getElementById('aiSel')?.value || 'ALL';
+
+  let data = STATE.players
+    .filter(p => n(p['Minutes']) > 0)
+    .filter(p => posFil === 'ALL' || s(p['Position']).toLowerCase().includes(posFil.toLowerCase()))
+    .filter(p => n(p['xP']) >= xpFil)
+    .filter(p => aiFil === 'ALL' || s(p['AI_Rating']) === aiFil)
+    .sort((a, b) => n(b['xP']) - n(a['xP']));
+
+  if (!data.length) {
+    document.getElementById('intelTableWrap').innerHTML = '<div class="dim" style="padding:20px;font-family:\'DM Mono\',monospace;font-size:12px">No players match the current filters.</div>';
+    return;
+  }
+
+  // Scatter
+  if (scatterChart) { scatterChart.destroy(); scatterChart = null; }
+  const posGroups = ['Goalkeeper','Defender','Midfielder','Forward'];
+  const ctx = document.getElementById('scatterChart');
+  if (ctx) {
+    scatterChart = new Chart(ctx, {
+      type: 'bubble',
+      data: {
+        datasets: posGroups.map(pos => ({
+          label: posShort(pos),
+          data: data.filter(p => s(p['Position']).toLowerCase().includes(pos.toLowerCase().slice(0,3)))
+            .map(p => ({ x: n(p['FD Index']) || 3, y: n(p['xP']), r: Math.max(n(p['xP']) * 1.8, 4), label: s(p['Player Name']) })),
+          backgroundColor: posColor(pos) + 'BB',
+          borderColor: posColor(pos), borderWidth: 1,
+        }))
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 10 } },
+          tooltip: { callbacks: { label: c => `${c.raw.label} — xP:${c.raw.y.toFixed(1)} FDI:${c.raw.x.toFixed(1)}` } }
+        },
+        scales: {
+          x: { title: { display: true, text: 'FD Index (lower = easier)', color: '#8B949E' }, min: 0, max: 5, grid: { color: '#1E2D4755' } },
+          y: { title: { display: true, text: 'Expected Points (xP)', color: '#8B949E' }, min: 0, grid: { color: '#1E2D4755' } }
+        }
+      }
+    });
+  }
+
+  // Top AI
+  const topAI = document.getElementById('topAI');
+  if (topAI) {
+    const sorted = [...data].sort((a, b) => n(b['AI_Rating'] === 'Premium' ? 5 : b['AI_Rating'] === 'Good' ? 4 : b['AI_Rating'] === 'Average' ? 3 : b['AI_Rating'] === 'Monitor' ? 2 : 1) - n(a['AI_Rating'] === 'Premium' ? 5 : 1));
+    const byAI = [...data].sort((a, b) => n(b['xP']) - n(a['xP']));
+    topAI.innerHTML = byAI.slice(0, 5).map((p, i) => `
+      <div class="ri">
+        <div class="rn ${i===0?'g':''}">${i+1}</div>
+        <div class="rinfo"><div class="rname">${s(p['Player Name'])}</div>
+          <div class="rmeta">${posShort(p['Position'])} · ${s(p['Team'])} · £${n(p['Cost']).toFixed(1)}m</div></div>
+        <div class="rscore" style="color:${n(p['xP'])>=8?'var(--teal)':'var(--gold)'}">${n(p['xP']).toFixed(1)}</div>
+      </div>`).join('');
+  }
+
+  // Top Differentials
+  const topDiff = document.getElementById('topDiff');
+  if (topDiff) {
+    const diffs = STATE.players
+      .filter(p => n(p['Ownership (%)']) < 15 && n(p['xP']) > 0)
+      .sort((a, b) => n(b['Differential Score']) - n(a['Differential Score']))
+      .slice(0, 5);
+    topDiff.innerHTML = diffs.map((p, i) => `
+      <div class="ri">
+        <div class="rn ${i===0?'g':''}">${i+1}</div>
+        <div class="rinfo"><div class="rname">${s(p['Player Name'])}</div>
+          <div class="rmeta">${n(p['Ownership (%)']).toFixed(1)}% owned · xP ${n(p['xP']).toFixed(1)}</div></div>
+        <div class="rscore" style="color:var(--purple)">${n(p['Differential Score']).toFixed(1)}</div>
+      </div>`).join('');
+  }
+
+  // Best XI — 4-3-3
+  const xi = document.getElementById('bestXI');
+  if (xi) {
+    const byPos = { gk: [], def: [], mid: [], fwd: [] };
+    STATE.players.filter(p => n(p['Minutes']) > 0).forEach(p => {
+      const pos = s(p['Position']).toLowerCase();
+      if (pos.includes('goal'))      byPos.gk.push(p);
+      else if (pos.includes('def'))  byPos.def.push(p);
+      else if (pos.includes('mid'))  byPos.mid.push(p);
+      else                           byPos.fwd.push(p);
+    });
+    Object.values(byPos).forEach(arr => arr.sort((a, b) => n(b['xP']) - n(a['xP'])));
+    const picks = [byPos.gk[0], ...byPos.def.slice(0,4), ...byPos.mid.slice(0,3), ...byPos.fwd.slice(0,3)].filter(Boolean);
+    xi.innerHTML = picks.map(p => {
+      const xp = n(p['xP']);
+      const xpc = xp >= 8 ? 'var(--teal)' : xp >= 5 ? 'var(--gold)' : 'var(--text2)';
+      const rating = s(p['AI_Rating']) || 'Average';
+      return `<div class="xi-card">
+        <div style="margin-bottom:5px"><span class="pb ${posClass(p['Position'])}">${posShort(p['Position'])}</span></div>
+        <div style="font-weight:700;font-size:12px;margin-bottom:2px">${s(p['Player Name'])}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:7px">${s(p['Team'])} · £${n(p['Cost']).toFixed(1)}m</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:${xpc};line-height:1">${xp.toFixed(1)}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text2)">xP</div>
+        <div style="margin-top:5px"><span class="ar ${arClass(rating)}">${rating}</span></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Full table
+  const wrap = document.getElementById('intelTableWrap');
+  if (wrap) {
+    let html = `<table class="tbl"><thead><tr>
+      <th>Player</th><th>Pos</th><th>Team</th><th>Price</th>
+      <th>xP</th><th>AI Rating</th><th>FD Index</th><th>ΔGoal Inv</th>
+      <th>Form</th><th>Owned %</th><th>Captain Score</th>
+    </tr></thead><tbody>`;
+    data.slice(0, 80).forEach(p => {
+      const fdi = n(p['FD Index']);
+      const dgi = n(p['Delta GI']);
+      const own = n(p['Ownership (%)']);
+      const rating = s(p['AI_Rating']) || 'Average';
+      html += `<tr>
+        <td style="font-weight:700">${s(p['Player Name'])}</td>
+        <td><span class="pb ${posClass(p['Position'])}">${posShort(p['Position'])}</span></td>
+        <td class="dim">${s(p['Team'])}</td>
+        <td>£${n(p['Cost']).toFixed(1)}m</td>
+        <td style="color:${n(p['xP'])>=8?'var(--teal)':n(p['xP'])>=5?'var(--gold)':'var(--text2)'};font-weight:700">${n(p['xP']).toFixed(1)}</td>
+        <td><span class="ar ${arClass(rating)}">${rating}</span></td>
+        <td style="color:${fdi<=2?'var(--teal)':fdi<=3?'var(--amber)':'var(--red)'}">${fdi.toFixed(2)}</td>
+        <td style="color:${dgi>=0?'var(--teal)':'var(--red)'}">${dgi>=0?'+':''}${dgi.toFixed(2)}</td>
+        <td>${n(p['Form']).toFixed(1)}</td>
+        <td><div class="bc"><span>${n(own).toFixed(1)}%</span><div class="bt"><div class="bf" style="width:${Math.min(own,100)}%;background:var(--purple)"></div></div></div></td>
+        <td style="color:var(--gold);font-weight:700">${n(p['Captaincy Score']).toFixed(1)}</td>
+      </tr>`;
+    });
+    wrap.innerHTML = html + '</tbody></table>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE 3 — TRANSFER LAB
+// ═══════════════════════════════════════════════════════════
+async function loadTransfers() {
+  try {
+    if (!STATE.players.length) STATE.players = await fetchSheet('Player Data');
+    renderTransfers();
+    STATE.loaded.transfers = true;
+  } catch (e) {
+    document.getElementById('capRow').innerHTML =
+      `<div class="error-box" style="grid-column:1/-1">⚠️ Could not load transfer data.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderTransfers() {
+  const players = STATE.players.filter(p => n(p['Minutes']) > 0);
+
+  // Captain podium
+  const caps = [...players].sort((a, b) => n(b['Captaincy Score']) - n(a['Captaincy Score'])).slice(0, 3);
+  const medals = ['👑', '🥈', '🥉'];
+  document.getElementById('capRow').innerHTML = caps.map((p, i) => {
+    const fdi = n(p['FD Index']);
+    const fdLbl = fdi <= 2 ? 'Easy Fixture' : fdi <= 3 ? 'Med Fixture' : 'Hard Fixture';
+    const fdC = fdi <= 2 ? 'g' : fdi <= 3 ? 'w' : '';
+    return `<div class="cap-card ${i===0?'gold-border':''}">
+      <div class="cap-crown">${medals[i]}</div>
+      <div class="cap-name">${s(p['Player Name'])}</div>
+      <div class="cap-sub">${posShort(p['Position'])} · ${s(p['Team'])} · £${n(p['Cost']).toFixed(1)}m</div>
+      <div class="cap-score">${n(p['Captaincy Score']).toFixed(1)}</div>
+      <div class="cap-slabel">Captain Score</div>
+      <div class="cap-pills">
+        <span class="cp g">xP ${n(p['xP']).toFixed(1)}</span>
+        <span class="cp ${fdC}">${fdLbl}</span>
+        <span class="cp">Form ${n(p['Form']).toFixed(1)}</span>
+        <span class="cp">${n(p['Ownership (%)']).toFixed(1)}% owned</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Transfer In — top Transfer In Score, available players
+  const tin = [...players]
+    .filter(p => s(p['Availability']) === 'a')
+    .sort((a, b) => n(b['Transfer In Score']) - n(a['Transfer In Score']))
+    .slice(0, 6);
+  document.getElementById('transferIn').innerHTML = tin.map(p => `
+    <div class="pc">
+      <div class="pav" style="background:${posAvBg(p['Position'])};color:${posColor(p['Position'])}">${posShort(p['Position'])}</div>
+      <div class="pi"><div class="pn">${s(p['Player Name'])}</div>
+        <div class="ps">${s(p['Team'])} · £${n(p['Cost']).toFixed(1)}m · ${n(p['Ownership (%)']).toFixed(1)}% owned</div></div>
+      <div class="pstat"><div class="v" style="color:var(--teal)">${n(p['xP']).toFixed(1)}</div><div class="l">xP</div></div>
+    </div>`).join('');
+
+  // Transfer Out — low xP, flagged availability or poor form
+  const tout = [...players]
+    .filter(p => n(p['xP']) < 5 || s(p['Availability']) !== 'a')
+    .sort((a, b) => n(a['xP']) - n(b['xP']))
+    .slice(0, 6);
+  document.getElementById('transferOut').innerHTML = tout.map(p => `
+    <div class="pc">
+      <div class="pav" style="background:rgba(248,81,73,0.12);color:var(--red)">${posShort(p['Position'])}</div>
+      <div class="pi"><div class="pn">${s(p['Player Name'])}</div>
+        <div class="ps">${s(p['Team'])} · £${n(p['Cost']).toFixed(1)}m · Form ${n(p['Form']).toFixed(1)}</div></div>
+      <div class="pstat"><div class="v" style="color:var(--red)">${n(p['xP']).toFixed(1)}</div><div class="l">xP SELL</div></div>
+    </div>`).join('');
+
+  // Net transfer movement chart
+  const xferData = [...players]
+    .filter(p => Math.abs(n(p['Net GW Transfers'])) > 0)
+    .sort((a, b) => Math.abs(n(b['Net GW Transfers'])) - Math.abs(n(a['Net GW Transfers'])))
+    .slice(0, 14);
+
+  destroyChart('xfer');
+  CHARTS.xfer = new Chart(document.getElementById('xferChart'), {
+    type: 'bar',
+    data: {
+      labels: xferData.map(p => s(p['Player Name'])),
+      datasets: [{
+        data: xferData.map(p => n(p['Net GW Transfers']) / 1000),
+        borderRadius: 4,
+        backgroundColor: xferData.map(p => n(p['Net GW Transfers']) > 0 ? 'rgba(0,212,170,0.7)' : 'rgba(248,81,73,0.7)')
+      }]
+    },
+    options: {
+      responsive: true, indexAxis: 'y',
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => (c.raw > 0 ? '+' : '') + Math.round(c.raw) + 'k net transfers' } } },
+      scales: {
+        x: { grid: { color: '#1E2D4755' }, ticks: { callback: v => (v > 0 ? '+' : '') + v + 'k' } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE 4 — FIXTURE PLANNER
+// ═══════════════════════════════════════════════════════════
+async function loadFixtures() {
+  try {
+    const rows = await fetchSheet('Fixture Planner');
+    renderFixtures(rows);
+    STATE.fixtures = rows;
+    STATE.loaded.fixtures = true;
+  } catch (e) {
+    document.getElementById('fdrWrap').innerHTML =
+      `<div class="error-box">⚠️ Could not load Fixture Planner sheet.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderFixtures(rows) {
+  if (!rows.length) return;
+
+  // Detect GW columns dynamically
+  const gwCols = Object.keys(rows[0]).filter(k => k.match(/Gameweek \d+ Display/i) || k.match(/GW\d+ Display/i));
+  const allKeys = Object.keys(rows[0]);
+  const displayCols = allKeys.filter(k => k.toLowerCase().includes('display') && (k.toLowerCase().includes('gameweek') || k.toLowerCase().includes(' gw')));
+  const typeCols    = allKeys.filter(k => k.toLowerCase().includes('type')    && (k.toLowerCase().includes('gameweek') || k.toLowerCase().includes(' gw')));
+  const fdrCols     = allKeys.filter(k => k.toLowerCase().includes('fdr') && !k.toLowerCase().includes('colour') && !k.toLowerCase().includes('avg') && (k.toLowerCase().includes('gameweek') || k.toLowerCase().includes(' gw')));
+
+  // FDR Heatmap table
+  const gwHeaders = displayCols.map((c, i) => {
+    // Extract GW label from column name e.g. "Gameweek 36 Display" → "GW36"
+    const m = c.match(/(\d+)/);
+    return m ? 'GW' + m[1] : `GW${i+1}`;
+  });
+
+  let tableHtml = `<table class="fdrt"><thead><tr><th style="text-align:left">Team</th>`;
+  gwHeaders.forEach(h => tableHtml += `<th>${h}</th>`);
+  tableHtml += '</tr></thead><tbody>';
+
+  rows.forEach(row => {
+    tableHtml += `<tr><td class="tn">${s(row['Team'])}</td>`;
+    displayCols.forEach((dc, i) => {
+      const disp = s(row[dc]);
+      const type = typeCols[i] ? s(row[typeCols[i]]) : 'Normal';
+      const fdr  = fdrCols[i]  ? n(row[fdrCols[i]])  : 3;
+      tableHtml += `<td style="${fdrStyle(fdr, type)}">${disp || '—'}</td>`;
+    });
+    tableHtml += '</tr>';
+  });
+  tableHtml += '</tbody></table>';
+  document.getElementById('fdrWrap').innerHTML = tableHtml;
+
+  // DGW / BGW Tracker
+  const specials = [];
+  rows.forEach(row => {
+    typeCols.forEach((tc, i) => {
+      const type = s(row[tc]);
+      const gwH  = gwHeaders[i];
+      if (type === 'DGW') specials.push({ team: s(row['Team']), gw: gwH, type: 'DGW', icon: '⚡', col: 'var(--purple)' });
+      if (type === 'BGW') specials.push({ team: s(row['Team']), gw: gwH, type: 'BGW', icon: '⚠️', col: 'var(--red)' });
+    });
+  });
+
+  if (specials.length) {
+    // Group by GW
+    const byGW = {};
+    specials.forEach(s2 => {
+      if (!byGW[s2.gw]) byGW[s2.gw] = { type: s2.type, teams: [], icon: s2.icon, col: s2.col };
+      byGW[s2.gw].teams.push(s2.team);
+    });
+    document.getElementById('dgwTracker').innerHTML = Object.entries(byGW).map(([gw, info]) => `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:18px">${info.icon}</div>
+        <div>
+          <div style="font-weight:700;font-size:12px;color:${info.col}">${gw} — ${info.type}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">${info.teams.join(', ')}</div>
+        </div>
+      </div>`).join('');
+  } else {
+    document.getElementById('dgwTracker').innerHTML =
+      `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);padding:12px">No DGW/BGW detected in next 8 GWs</div>`;
+  }
+
+  // Best fixture run chart — sort by Avg FDR Next 5 GW
+  const avgCol = 'Avg FDR Next 5 GW';
+  const sorted = [...rows].filter(r => n(r[avgCol]) > 0).sort((a, b) => n(a[avgCol]) - n(b[avgCol])).slice(0, 8);
+
+  destroyChart('fdrAvg');
+  CHARTS.fdrAvg = new Chart(document.getElementById('fdrAvgChart'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(r => s(r['Team'])),
+      datasets: [{
+        data: sorted.map(r => n(r[avgCol])),
+        borderRadius: 4,
+        backgroundColor: sorted.map(r => {
+          const v = n(r[avgCol]);
+          return v <= 2 ? 'rgba(0,212,170,0.75)' : v <= 3 ? 'rgba(240,173,78,0.75)' : 'rgba(248,81,73,0.75)';
+        })
+      }]
+    },
+    options: {
+      responsive: true, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => 'Avg FDR: ' + c.raw.toFixed(2) } } },
+      scales: { x: { min: 1, max: 5, grid: { color: '#1E2D4755' } }, y: { grid: { display: false } } }
+    }
+  });
+
+  // My Squad Fixture View — from My FPL - Current Squad
+  renderSquadFDR(rows, displayCols, typeCols, fdrCols, gwHeaders);
+}
+
+async function renderSquadFDR(fixtureRows, displayCols, typeCols, fdrCols, gwHeaders) {
+  try {
+    let squadData = STATE.squad;
+    if (!squadData.length) {
+      squadData = await fetchSheet('My FPL - Current Squad');
+      STATE.squad = squadData;
+    }
+
+    const squadNames = squadData.filter(p => s(p['Is Starting']) === 'Yes').map(p => s(p['Player Name']));
+    const teamMap = {};
+    STATE.players.forEach(p => { teamMap[s(p['Player Name'])] = s(p['Team']); });
+    squadData.forEach(p => { teamMap[s(p['Player Name'])] = s(p['Team']); });
+
+    // Find fixture row for each squad player's team
+    const gwSlice = Math.min(4, displayCols.length);
+
+    let html = `<table class="fdrt"><thead><tr><th style="text-align:left">Player</th>`;
+    gwHeaders.slice(0, gwSlice).forEach(h => html += `<th>${h}</th>`);
+    html += '</tr></thead><tbody>';
+
+    squadNames.slice(0, 11).forEach(pname => {
+      const team = teamMap[pname];
+      const fRow = fixtureRows.find(r => s(r['Team']).toLowerCase() === (team || '').toLowerCase());
+      html += `<tr><td class="tn">${pname}</td>`;
+      for (let i = 0; i < gwSlice; i++) {
+        if (fRow) {
+          const disp = displayCols[i] ? s(fRow[displayCols[i]]) : '—';
+          const type = typeCols[i]    ? s(fRow[typeCols[i]])    : 'Normal';
+          const fdr  = fdrCols[i]     ? n(fRow[fdrCols[i]])     : 3;
+          html += `<td style="${fdrStyle(fdr, type)}">${disp || '—'}</td>`;
+        } else {
+          html += `<td style="background:var(--surface2);color:var(--text2)">—</td>`;
+        }
+      }
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('squadFdrWrap').innerHTML = html;
+
+  } catch (e) {
+    document.getElementById('squadFdrWrap').innerHTML =
+      `<div class="error-box">⚠️ Could not load squad for fixture view.<br><small>${e.message}</small></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT — load My Season on page load
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadSeason();
+});
+</script>
+</body>
+</html>
