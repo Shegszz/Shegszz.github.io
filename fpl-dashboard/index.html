@@ -687,39 +687,81 @@ function fdrStyle(fdrVal, type) {
 // ═══════════════════════════════════════════════════════════
 async function loadSeason() {
   try {
-    // Fetch KPI summary (single row) and full history in parallel
+    // Read the KPI row and season history from the two personal tabs.
     const [kpiRows, histRows] = await Promise.all([
       fetchSheet('My FPL - KPI Summary'),
       fetchSheet('My FPL - Season History'),
     ]);
 
-    STATE.kpi     = kpiRows[0] || {};
-    STATE.history = histRows;
+    const kpi = kpiRows[0] || {};
+    const kpiSeason = String(kpi['Season'] || '').trim();
 
-    const notStarted = s(STATE.kpi['Season Status']) === 'not_started';
+    // The sync script must tag the KPI record and every history row.
+    if (kpiSeason !== CURRENT_SEASON) {
+      throw new Error(
+        `KPI season mismatch: expected ${CURRENT_SEASON}, received ${kpiSeason || 'no Season value'}.`
+      );
+    }
+
+    const currentHistory = histRows.filter(row =>
+      String(row['Season'] || '').trim() === CURRENT_SEASON
+    );
+
+    if (histRows.length && currentHistory.length === 0) {
+      throw new Error(
+        `No ${CURRENT_SEASON} gameweek rows found. The sheet may still contain previous-season data.`
+      );
+    }
+
+    STATE.kpi = kpi;
+
+    const notStarted = String(kpi['Season Status'] || '').trim() === 'not_started';
+
+    // Do not pass the not-started placeholder to charts/tables as a real GW.
+    STATE.history = notStarted
+      ? []
+      : currentHistory.filter(row =>
+          row['Gameweek'] !== '' &&
+          row['Gameweek'] !== undefined &&
+          row['GW Points'] !== '' &&
+          row['GW Points'] !== undefined
+        );
 
     if (notStarted) {
       renderSeasonWaiting();
-    } else {
+    } else if (STATE.history.length > 0) {
       renderKPIs();
       renderStatPills();
       renderSeasonCharts();
       renderChips();
       renderCareerSeasons();
       renderGWTable();
+    } else {
+      throw new Error(
+        `The ${CURRENT_SEASON} history tab contains no completed gameweeks.`
+      );
     }
 
     STATE.loaded.season = true;
 
-    const upd = s(STATE.kpi['Last Updated']) || new Date().toUTCString();
+    const updated = String(kpi['Last Updated'] || new Date().toUTCString());
+    const currentGW = Number(kpi['Current Gameweek'] || 0);
     document.getElementById('lastUpdated').textContent = notStarted
-      ? `Team ID: 2551369 · Waiting for GW${n(STATE.kpi['Current Gameweek']) || 1} · ${upd}`
-      : `Team ID: 2551369 · Last updated: ${upd}`;
+      ? `Team ID: ${kpi['Team ID'] || 2551369} · Waiting for GW${currentGW || 1} · ${updated}`
+      : `Team ID: ${kpi['Team ID'] || 2551369} · ${CURRENT_SEASON} · Last updated: ${updated}`;
 
-  } catch (e) {
-    console.error('Season load error:', e);
-    document.getElementById('gwTableWrap').innerHTML =
-      `<div class="error-box">⚠️ Could not load data. Check the sheet is set to public viewer.<br><small>${e.message}</small></div>`;
+  } catch (error) {
+    console.error('Season load error:', error);
+    STATE.loaded.season = false;
+    STATE.history = [];
+    STATE.kpi = null;
+
+    // Keep this failure local to My Season; don't interfere with other pages.
+    const table = document.getElementById('gwTableWrap');
+    if (table) {
+      table.innerHTML =
+        `<div class="error-box">⚠️ My Season data validation failed.<br><small>${error.message}</small></div>`;
+    }
   }
 }
 
