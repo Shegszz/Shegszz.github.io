@@ -685,18 +685,6 @@ function fdrStyle(fdrVal, type) {
 // ═══════════════════════════════════════════════════════════
 // PAGE 1 — MY SEASON
 // ═══════════════════════════════════════════════════════════
-async function loadSeason() {
-  try {
-    // Fetch KPI summary (single row) and full history in parallel
-    const [kpiRows, histRows] = await Promise.all([
-      fetchSheet('My FPL - KPI Summary'),
-      fetchSheet('My FPL - Season History'),
-    ]);
-
-    STATE.kpi     = kpiRows[0] || {};
-    STATE.history = histRows;
-
-    const notStarted = s(STATE.kpi['Season Status']) === 'not_started';
 
     if (notStarted) {
       renderSeasonWaiting();
